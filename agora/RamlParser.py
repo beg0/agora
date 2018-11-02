@@ -3,6 +3,9 @@
 # AGORA Another Generator Of Rest Api
 # (c) 2018 - beg0
 #
+
+""" Handle RAML files in AGORA. """
+
 import re
 from pyraml import parser as prp
 from agora.InternalNode import InternalNode

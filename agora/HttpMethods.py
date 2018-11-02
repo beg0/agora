@@ -3,7 +3,8 @@
 # AGORA Another Generator Of Rest Api
 # (c) 2018 - beg0
 #
-""" Methods to do HTTP requests for standard REST verbs """
+
+""" Methods to do HTTP requests for standard REST verbs. """
 
 import json
 import requests

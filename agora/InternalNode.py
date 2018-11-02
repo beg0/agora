@@ -4,6 +4,8 @@
 # (c) 2018 - beg0
 #
 
+""" Classes that are used internally to represent the resource tree. """
+
 from __future__ import print_function
 import re
 

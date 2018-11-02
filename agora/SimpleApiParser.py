@@ -3,10 +3,15 @@
 # AGORA Another Generator Of Rest Api
 # (c) 2018 - beg0
 #
+
+""" Light parser to generate resource tree programatically. """
+
 from agora.InternalNode import InternalNode
 
 class SimpleApiParser(object):
-    """ A Simple (e.g. light) API parser
+    """
+    A Simple (e.g. light) API parser.
+
     Used when your API is very light and you don't have an external file to define it (unlike
     Swagger or RAML)
 

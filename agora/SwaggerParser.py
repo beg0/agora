@@ -3,6 +3,9 @@
 # AGORA Another Generator Of Rest Api
 # (c) 2018 - beg0
 #
+
+""" Handle Swagger 2.0 files in AGORA. """
+
 import re
 import flex
 

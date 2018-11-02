@@ -3,6 +3,8 @@
 # AGORA Another Generator Of Rest Api
 # (c) 2018 - beg0
 #
+
+""" Classes that are used in public API to represent the resource tree. """
 import sys
 
 from agora.HttpMethods import METHOD_TO_FUNCTIONS
