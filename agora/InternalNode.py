@@ -28,17 +28,12 @@ class InternalMethod(object):
         else:
             self.request_mime = self.response_mime = None
 
-        if 'request_mime' in kwargs:
-            self.request_mime = kwargs['request_mime']
-            del kwargs['request_mime']
-        else:
-            self.request_mime = None
-
-        if 'resonse_mime' in kwargs:
-            self.response_mime = kwargs['response_mime']
-            del kwargs['response_mime']
-        else:
-            self.response_mime = None
+        for attr in [ 'request_mime','response_mime','request_validator', 'response_validator' ]:
+            if attr in kwargs:
+                self.__setattr__(attr, kwargs[attr])
+                del kwargs[attr]
+            else:
+                self.__setattr__(attr, None)
 
         if kwargs:
             raise LookupError("Unknown methods parameters: " + ", ".join(kwargs.keys()))
