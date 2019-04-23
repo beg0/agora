@@ -6,11 +6,11 @@
 
 """ Classes that are used in public API to represent the resource tree. """
 import sys
+import json
 import six
 import requests
 import requests.sessions
 import requests.models
-import json
 
 def debug(*msg):
     """ Helper method to print debug message """
@@ -105,7 +105,6 @@ class ResourceNode(object):
                 if method.request_validator:
                     method.request_validator(prep)
 
-
                 proxies = {}
                 settings = session.merge_environment_settings(
                     prep.url, proxies,  None, None, None
@@ -122,8 +121,6 @@ class ResourceNode(object):
                 if method.response_validator:
                     method.response_validator(reply, request_method = verb.lower(), raw_request=prep)
 
-                #reply = session.request(method=verb, url=self.url, **request_kwargs)
-                #reply = requests.request(verb, self.url, **request_kwargs)
                 ret = None
                 if reply is not None and reply.status_code >= 200 and reply.status_code < 300 and reply.text:
                     ret = reply.json()
@@ -155,12 +152,13 @@ class ResourceNode(object):
         if len(lst) == 1:
             if len(self.internal_node.param_children) < 1:
                 raise TypeError("There is no parameter for this URL")
-            elif len(self.internal_node.param_children) > 1:
+
+            if len(self.internal_node.param_children) > 1:
                 raise TypeError("Can't deduce parameter name: too many possibilities")
-            else:
-                # Right usage of the API
-                param_name = next(iter(self.internal_node.param_children))
-                param_value = lst[0]
+
+            # Right usage of the API
+            param_name = next(iter(self.internal_node.param_children))
+            param_value = lst[0]
         elif len(lst) != 0:
             raise TypeError("Too many positional agument, except at max one")
 
@@ -178,16 +176,16 @@ class ResourceNode(object):
 
             if param_value in self.param_children[param_name]:
                 return self.param_children[param_name][param_value]
-            else:
-                debug("created")
 
-                child = ParamResourceNode(self,
-                                          self.internal_node.param_children[param_name],
-                                          param_value,
-                                          lazyloading=self.lazyloading)
+            debug("created")
 
-                self.param_children[param_name][param_value] = child
-                return child
+            child = ParamResourceNode(self,
+                                        self.internal_node.param_children[param_name],
+                                        param_value,
+                                        lazyloading=self.lazyloading)
+
+            self.param_children[param_name][param_value] = child
+            return child
         else:
             raise TypeError("No such parameter %s" % param_name)
 
