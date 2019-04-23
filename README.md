@@ -11,12 +11,15 @@ The REST API may be defined in a number of way, including [Swagger](https://swag
 
 ### Simple Usage
 ```py
+from __future__ import print_function
 import agora
 from agora.SwaggerParser import SwaggerParser
 
 
-api = agora.create_api("https://petstore.swagger.io/v2/swagger.json", parser=SwaggerParser)
-
+api = agora.create_api("https://petstore.swagger.io/v2/swagger.json",
+                       parser=SwaggerParser,
+                       enable_response_validator=True,
+                       enable_request_validator=False)
 
 api.set_base_url("https://petstore.swagger.io/v2")
 
@@ -28,8 +31,9 @@ if all_available_pets:
     order = api.store.order.post(petId=first_pet["id"], quantity=1)
     order_id = order["id"]
 
-    print("Actually, it was impulse buy, cancel my order...")
+    print("Actually, it was impulse buy, cancel my order #%d..." % order_id)
     api.store.order(order_id).delete()
 else:
     print("no pet available :(")
+
 ```
