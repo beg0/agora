@@ -1,3 +1,8 @@
+# vim: set syntax=python:
+# vim: set ts=4 sts=4 sw=4 et:
+# AGORA Another Generator Of Rest Api
+# Copyright (c) 2018, 2019 - beg0
+#
 
 import unittest
 from unittest.util import safe_repr

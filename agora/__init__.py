@@ -1,7 +1,7 @@
 # vim: set syntax=python:
 # vim: set ts=4 sts=4 sw=4 et:
 # AGORA Another Generator Of Rest Api
-# (c) 2018 - beg0
+# Copyright (c) 2018, 2019 - beg0
 #
 
 """ AGORA Another Generator Of Rest Api. """
