@@ -66,8 +66,8 @@ class TestResourceNode(unittest.TestCase):
         self.assertIsInstance(param_child1, ParamResourceNode)
         self.assertIsInstance(param_child2, ParamResourceNode)
 
-        self.assertIs(root(param1="arg_first_param"),param_child1, "don't recreate param");
-        self.assertNotEqual(root(param1="another_arg_first_param"),param_child1, "different args give differents nodes");
+        self.assertIs(root(param1="arg_first_param"),param_child1, "don't recreate param")
+        self.assertNotEqual(root(param1="another_arg_first_param"),param_child1, "different args give differents nodes")
 
         self.assertNotEqual(param_child1, param_child2)
 
@@ -88,7 +88,7 @@ class TestResourceNode(unittest.TestCase):
         with self.assertRaisesRegexp(TypeError,"There is no parameter for this URL"):
             root.child3("bad arg")
 
-        param_child3 = root.child1("arg_third_param");
+        param_child3 = root.child1("arg_third_param")
         self.assertIsInstance(param_child3, ParamResourceNode)
 
         self.assertEqual(param_child3, root.child1(param3="arg_third_param"),"creation by list == creation by kw")

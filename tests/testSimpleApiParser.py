@@ -35,7 +35,7 @@ class TestSimpleParser(unittest.TestCase):
         try:
             l = len(expr)
         except (TypeError, NotImplementedError):
-            msg = self;_formatMessage(msg, '%s has no length.    Non-sequence?' % (type(expr).__name__))
+            msg = self._formatMessage(msg, '%s has no length.    Non-sequence?' % (type(expr).__name__))
             raise self.failureException(msg)
 
         if l != 0:
