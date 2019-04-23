@@ -10,7 +10,12 @@ import agora.ResourceNode
 import agora.SimpleApiParser
 
 
-def create_api(resources, parser=agora.SimpleApiParser.SimpleApiParser, lazyloading=True):
+def create_api(resources, parser=agora.SimpleApiParser.SimpleApiParser,
+        lazyloading=True,
+        enable_request_validator=True,
+        enable_response_validator=True):
     """ Parse a resource descriptor and return the Resources tree associated to it """
     internal_root = parser(resources).parse()
-    return agora.ResourceNode.RootResourceNode(internal_root, lazyloading=lazyloading)
+    return agora.ResourceNode.RootResourceNode(internal_root, lazyloading=lazyloading,
+        enable_request_validator=enable_request_validator,
+        enable_response_validator=enable_response_validator)

@@ -27,7 +27,11 @@ class ResourceNode(object):
 
     This is the public part of AGORA. """
 
-    def __init__(self, parent, internal_node, lazyloading=True):
+    def __init__(self, parent, internal_node,
+        lazyloading=True,
+        enable_request_validator=True,
+        enable_response_validator=True):
+
         #self.url=internal_node.get_url()
 
 
@@ -36,6 +40,9 @@ class ResourceNode(object):
         self.lazyloading = lazyloading
 
         self.param_children = {}
+
+        self.request_validator_enable = enable_request_validator
+        self.response_validator_enable = enable_response_validator
 
         for method in internal_node.methods:
             self._generate_http_request_method(method)
@@ -102,7 +109,7 @@ class ResourceNode(object):
 
                 prep = session.prepare_request(req)
 
-                if method.request_validator:
+                if self.request_validator_enable and method.request_validator:
                     method.request_validator(prep)
 
                 proxies = {}
@@ -118,7 +125,7 @@ class ResourceNode(object):
                 send_kwargs.update(settings)
                 reply = session.send(prep, **send_kwargs)
 
-                if method.response_validator:
+                if self.response_validator_enable and  method.response_validator:
                     method.response_validator(reply, request_method = verb.lower(), raw_request=prep)
 
                 ret = None
@@ -182,7 +189,9 @@ class ResourceNode(object):
             child = ParamResourceNode(self,
                                         self.internal_node.param_children[param_name],
                                         param_value,
-                                        lazyloading=self.lazyloading)
+                                        lazyloading=self.lazyloading,
+                                        enable_request_validator=self.request_validator_enable,
+                                        enable_response_validator=self.response_validator_enable)
 
             self.param_children[param_name][param_value] = child
             return child
@@ -195,7 +204,10 @@ class ResourceNode(object):
         debug("ask for", attr)
         try:
             child_internal_node = self.internal_node.children[attr]
-            child = ResourceNode(self, child_internal_node, lazyloading=self.lazyloading)
+            child = ResourceNode(self, child_internal_node,
+                                        lazyloading=self.lazyloading,
+                                        enable_request_validator=self.request_validator_enable,
+                                        enable_response_validator=self.response_validator_enable)
             self.__dict__[attr] = child
             return child
         except KeyError: # no such child, let object.__getattribute__
@@ -225,9 +237,15 @@ class ParamResourceNode(ResourceNode):
 
     e.g a resource which url looks like /user/{user}/photo
     """
-    def __init__(self, parent, internal_node, value, lazyloading=True):
+    def __init__(self, parent, internal_node, value,
+            lazyloading=True,
+        enable_request_validator=True,
+        enable_response_validator=True):
         self.value = value
-        super(ParamResourceNode, self).__init__(parent, internal_node, lazyloading=lazyloading)
+        super(ParamResourceNode, self).__init__(parent, internal_node,
+                    lazyloading=lazyloading,
+                    enable_request_validator=enable_request_validator,
+                    enable_response_validator=enable_response_validator)
 
         self._update_url()
 
@@ -242,8 +260,15 @@ class ParamResourceNode(ResourceNode):
 class RootResourceNode(ResourceNode):
     """ The Resource Node that is the root of all other resources
     """
-    def __init__(self, internal_root, lazyloading=True):
-        super(RootResourceNode, self).__init__(None, internal_root, lazyloading=lazyloading)
+    def __init__(self, internal_root,
+        lazyloading=True,
+        enable_request_validator=True,
+        enable_response_validator=True):
+
+        super(RootResourceNode, self).__init__(None, internal_root,
+            lazyloading=lazyloading,
+            enable_request_validator=enable_request_validator,
+            enable_response_validator=enable_response_validator)
 
     def set_base_url(self, base_url):
         """ Set the base URL to use for every resources in the resource tree """
