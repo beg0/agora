@@ -11,8 +11,6 @@ import re
 
 from six import string_types
 
-from agora.HttpMethods import METHOD_TO_FUNCTIONS
-
 VARNAME_RE = re.compile("^\\$\\{(.*)\\}$")
 
 class InternalMethod(object):
@@ -20,6 +18,7 @@ class InternalMethod(object):
 
     Used by InternalNode """
     def __init__(self, verb, **kwargs):
+        assert isinstance(verb, string_types), "HTTP verb must be a string"
         self.verb = verb.upper()
 
         if 'mime' in kwargs:
@@ -94,10 +93,7 @@ class InternalNode(object):
 
     def add_method(self, verb, **kwargs):
         """ Add a VERB to this node """
-        if verb.upper() not in METHOD_TO_FUNCTIONS:
-            raise ValueError("bad method %s" % verb)
-
-        method = InternalMethod(verb.upper(), **kwargs)
+        method = InternalMethod(verb, **kwargs)
 
         if method not in self.methods:
             self.methods.append(method)
