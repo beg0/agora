@@ -6,8 +6,11 @@
 
 """ Classes that are used in public API to represent the resource tree. """
 import sys
-
-from agora.HttpMethods import METHOD_TO_FUNCTIONS
+import six
+import requests
+import requests.sessions
+import requests.models
+import json
 
 def debug(*msg):
     """ Helper method to print debug message """
@@ -23,6 +26,7 @@ class ResourceNode(object):
     depending on the resource.
 
     This is the public part of AGORA. """
+
     def __init__(self, parent, internal_node, lazyloading=True):
         #self.url=internal_node.get_url()
 
@@ -34,12 +38,7 @@ class ResourceNode(object):
         self.param_children = {}
 
         for method in internal_node.methods:
-            verb = method.verb
-            assert verb in METHOD_TO_FUNCTIONS, "%s is invalid verb" % verb
-            unbound = METHOD_TO_FUNCTIONS[verb]
-            bound = unbound.__get__(self, ResourceNode)
-
-            self.__setattr__(verb.lower(), bound)
+            self._generate_http_request_method(method)
 
         #if internal_node.doc is not None:
         #    self.__doc__ = internal_node.doc
@@ -53,6 +52,91 @@ class ResourceNode(object):
         if lazyloading is False:
             for attr in self.internal_node.children:
                 self.__getattr__(attr)
+
+    @staticmethod
+    def is_valid_method(verb):
+        """ test if a string is a valid HTTP verb """
+        if not isinstance(verb, six.string_types):
+            return False
+
+        # Note: RAML also define the OPTIONS verbs
+        return verb.upper() in ["GET", "POST", "PUT", "DELETE", "HEAD", "PATCH"]
+
+    def _generate_http_request_method(self, method):
+        """ Generate the 'get','post','put', 'delete', 'head' and 'patch' functions attached to this ResourceNode
+        programatically """
+        verb = method.verb
+
+        assert ResourceNode.is_valid_method(verb), "%s is invalid verb" % verb
+
+        def unbound(self, **kwargs):
+            """
+            Do the HTTP request for a given verb and return the replied json object
+
+            This method will be bound to a ResourceNode object
+            """
+            debug("url=",self.url)
+            with requests.sessions.Session() as session:
+
+                params = None
+                headers = {}
+                data = None
+                if verb in [ "GET", "DELETE", "HEAD" ]:
+                    params = kwargs
+                elif verb in ["POST", "PUT", "PATCH"]:
+                    headers['Content-Type'] = 'application/json'
+                    data = json.dumps(kwargs)
+
+                req = requests.models.Request(
+                        method = verb,
+                        url = self.url,
+                        headers = headers,
+                        files = None,
+                        data = data or {},
+                        json = None,
+                        params = params,
+                        auth = None,
+                        cookies = None,
+                        hooks = None
+                        )
+
+                prep = session.prepare_request(req)
+
+                if method.request_validator:
+                    method.request_validator(prep)
+
+
+                proxies = {}
+                settings = session.merge_environment_settings(
+                    prep.url, proxies,  None, None, None
+                )
+
+                # Send the request.
+                send_kwargs = {
+                    'timeout': None,
+                    'allow_redirects': True,
+                }
+                send_kwargs.update(settings)
+                reply = session.send(prep, **send_kwargs)
+
+                if method.response_validator:
+                    method.response_validator(reply, request_method = verb.lower(), raw_request=prep)
+
+                #reply = session.request(method=verb, url=self.url, **request_kwargs)
+                #reply = requests.request(verb, self.url, **request_kwargs)
+                ret = None
+                if reply is not None and reply.status_code >= 200 and reply.status_code < 300 and reply.text:
+                    ret = reply.json()
+                return ret
+
+        # Update docstring to reflect the HTTP verb
+        # FIXME: Does not work
+        unbound.__doc__ = """ Do the HTTP  """ + verb + """ request and return the replied json object """
+
+        # Now bind the function 'unbound' to this ResourceNode
+        bound = unbound.__get__(self, ResourceNode)
+
+        self.__setattr__(verb.lower(), bound)
 
     def __call__(self, *lst, **kwargs):
         if len(lst) > 0 and len(kwargs) > 0:
@@ -166,7 +250,7 @@ class RootResourceNode(ResourceNode):
     def set_base_url(self, base_url):
         """ Set the base URL to use for every resources in the resource tree """
 
-        if base_url[-1] == '/':
+        while base_url[-1] == '/':
             base_url = base_url[:-1]
         self.url = base_url
         self._update_children_url()
