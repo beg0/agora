@@ -20,7 +20,7 @@ setup(
     author_email='beg0@free.fr',
     packages=['agora'],
     url='https://github.com/beg0/agora',
-    #license='MIT',
+    license='MIT',
     description='Another Generator Of Rest Api.',
     long_description="AGORA is a library to generate client-side accessors for HTTP REST API.",
     install_requires=[
@@ -36,7 +36,7 @@ setup(
         'Development Status :: 4 - Beta',
         'Environment :: Console',
         'Intended Audience :: Developers',
-        #'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
