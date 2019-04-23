@@ -19,7 +19,7 @@ setup(
     author='beg0',
     author_email='beg0@free.fr',
     packages=['agora'],
-    #url='https://github.com/beg0/agora',
+    url='https://github.com/beg0/agora',
     #license='MIT',
     description='Another Generator Of Rest Api.',
     long_description="AGORA is a library to generate client-side accessors for HTTP REST API.",
