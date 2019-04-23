@@ -125,13 +125,6 @@ class TestInternalNode(unittest.TestCase):
         node.add_method("put")
         self.assertEqual(node.methods,[InternalMethod("GET"),InternalMethod("PUT")])
 
-        with self.assertRaisesRegexp(ValueError, "bad method foo"):
-            node.add_method("foo")
-
-        # Foo not added
-        self.assertEqual(node.methods,[InternalMethod("GET"),InternalMethod("PUT")])
-
-
     def test_set_doc(self):
         name = "james_bond"
         helpstring="RTFM"
