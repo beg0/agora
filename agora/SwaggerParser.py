@@ -34,19 +34,23 @@ class SwaggerParser(object):
         root = InternalNode("", None)
 
         def request_validator(req):
+            """ callback used to validate a request """
             flex.core.validate_api_request(schema, req)
 
-        def response_validator(reply,  request_method='get', raw_request=None):
-            flex.core.validate_api_response(schema, reply, request_method = request_method, raw_request = raw_request)
+        def response_validator(reply, request_method='get', raw_request=None):
+            """ callback used to validate a server response """
+            flex.core.validate_api_response(schema, reply,
+                                            request_method=request_method,
+                                            raw_request=raw_request)
 
         for path in paths:
 
-            urlParts = path.split("/")
+            url_parts = path.split("/")
 
             # get the final node
             #TODO: resolve '$ref' in path
             parent = root
-            for part in urlParts:
+            for part in url_parts:
                 if not part:
                     continue
 
@@ -61,5 +65,7 @@ class SwaggerParser(object):
 
             resource = paths[path]
             for verb in resource:
-                parent.add_method(verb, request_validator=request_validator, response_validator=response_validator)
+                parent.add_method(verb,
+                                  request_validator=request_validator,
+                                  response_validator=response_validator)
         return root
