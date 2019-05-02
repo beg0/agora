@@ -27,22 +27,21 @@ class ResourceNode(object):
 
     This is the public part of AGORA. """
 
-    def __init__(self, parent, internal_node,
-        lazyloading=True,
-        enable_request_validator=True,
-        enable_response_validator=True):
-
+    def __init__(self, parent, internal_node):
         #self.url=internal_node.get_url()
-
 
         self.parent = parent
         self.internal_node = internal_node
-        self.lazyloading = lazyloading
+
+        if parent is not None:
+            self.shared_config = parent.shared_config
+        else:
+            assert hasattr(self, "shared_config"), \
+                "for RootResourceNode self.shared_config must be created before ResourceNode xtor"
+
+        assert isinstance(self.shared_config, dict)
 
         self.param_children = {}
-
-        self.request_validator_enable = enable_request_validator
-        self.response_validator_enable = enable_response_validator
 
         for method in internal_node.methods:
             self._generate_http_request_method(method)
@@ -56,7 +55,7 @@ class ResourceNode(object):
         self._update_url()
 
         # create all (non-param) children, unless lasyloading is enabled
-        if lazyloading is False:
+        if self.shared_config["lazyloading"] is False:
             for attr in self.internal_node.children:
                 self.__getattr__(attr)
 
@@ -70,8 +69,8 @@ class ResourceNode(object):
         return verb.upper() in ["GET", "POST", "PUT", "DELETE", "HEAD", "PATCH"]
 
     def _generate_http_request_method(self, method):
-        """ Generate the 'get','post','put', 'delete', 'head' and 'patch' functions attached to this ResourceNode
-        programatically """
+        """ Generate the 'get','post','put', 'delete', 'head' and 'patch' functions attached to
+        this ResourceNode programatically """
         verb = method.verb
 
         assert ResourceNode.is_valid_method(verb), "%s is invalid verb" % verb
@@ -82,13 +81,13 @@ class ResourceNode(object):
 
             This method will be bound to a ResourceNode object
             """
-            debug("url=",self.url)
+            debug("url=", self.url)
             with requests.sessions.Session() as session:
 
                 params = None
                 headers = {}
                 data = None
-                if verb in [ "GET", "DELETE", "HEAD" ]:
+                if verb in ["GET", "DELETE", "HEAD"]:
                     params = kwargs
                 elif verb in ["POST", "PUT", "PATCH"]:
                     headers['Content-Type'] = 'application/json'
@@ -109,12 +108,12 @@ class ResourceNode(object):
 
                 prep = session.prepare_request(req)
 
-                if self.request_validator_enable and method.request_validator:
+                if self.shared_config["request_validator_enable"] and method.request_validator:
                     method.request_validator(prep)
 
                 proxies = {}
                 settings = session.merge_environment_settings(
-                    prep.url, proxies,  None, None, None
+                    prep.url, proxies, None, None, None
                 )
 
                 # Send the request.
@@ -125,17 +124,22 @@ class ResourceNode(object):
                 send_kwargs.update(settings)
                 reply = session.send(prep, **send_kwargs)
 
-                if self.response_validator_enable and  method.response_validator:
-                    method.response_validator(reply, request_method = verb.lower(), raw_request=prep)
+                if self.shared_config["response_validator_enable"] and  method.response_validator:
+                    method.response_validator(reply,
+                                              request_method=verb.lower(),
+                                              raw_request=prep)
 
                 ret = None
-                if reply is not None and reply.status_code >= 200 and reply.status_code < 300 and reply.text:
+                if reply is not None and \
+                    reply.status_code >= 200 and \
+                    reply.status_code < 300 and \
+                    reply.text:
                     ret = reply.json()
                 return ret
 
         # Update docstring to reflect the HTTP verb
         # FIXME: Does not work
-        unbound.__doc__ = """ Do the HTTP  """ + verb + """ request and return the replied json object """
+        unbound.__doc__ = """ Do the HTTP  %s request and return the replied json object """ % verb
 
         # Now bind the function 'unbound' to this ResourceNode
         bound = unbound.__get__(self, ResourceNode)
@@ -187,11 +191,8 @@ class ResourceNode(object):
             debug("created")
 
             child = ParamResourceNode(self,
-                                        self.internal_node.param_children[param_name],
-                                        param_value,
-                                        lazyloading=self.lazyloading,
-                                        enable_request_validator=self.request_validator_enable,
-                                        enable_response_validator=self.response_validator_enable)
+                                      self.internal_node.param_children[param_name],
+                                      param_value)
 
             self.param_children[param_name][param_value] = child
             return child
@@ -204,10 +205,7 @@ class ResourceNode(object):
         debug("ask for", attr)
         try:
             child_internal_node = self.internal_node.children[attr]
-            child = ResourceNode(self, child_internal_node,
-                                        lazyloading=self.lazyloading,
-                                        enable_request_validator=self.request_validator_enable,
-                                        enable_response_validator=self.response_validator_enable)
+            child = ResourceNode(self, child_internal_node)
             self.__dict__[attr] = child
             return child
         except KeyError: # no such child, let object.__getattribute__
@@ -237,15 +235,9 @@ class ParamResourceNode(ResourceNode):
 
     e.g a resource which url looks like /user/{user}/photo
     """
-    def __init__(self, parent, internal_node, value,
-            lazyloading=True,
-        enable_request_validator=True,
-        enable_response_validator=True):
+    def __init__(self, parent, internal_node, value):
         self.value = value
-        super(ParamResourceNode, self).__init__(parent, internal_node,
-                    lazyloading=lazyloading,
-                    enable_request_validator=enable_request_validator,
-                    enable_response_validator=enable_response_validator)
+        super(ParamResourceNode, self).__init__(parent, internal_node)
 
         self._update_url()
 
@@ -261,14 +253,19 @@ class RootResourceNode(ResourceNode):
     """ The Resource Node that is the root of all other resources
     """
     def __init__(self, internal_root,
-        lazyloading=True,
-        enable_request_validator=True,
-        enable_response_validator=True):
+                 lazyloading=True,
+                 enable_request_validator=True,
+                 enable_response_validator=True):
 
-        super(RootResourceNode, self).__init__(None, internal_root,
-            lazyloading=lazyloading,
-            enable_request_validator=enable_request_validator,
-            enable_response_validator=enable_response_validator)
+        # Create the shared config.
+        # As its name stand for, this dict will be shared by all ResourceNode
+        self.shared_config = {
+            "lazyloading": lazyloading,
+            "request_validator_enable": enable_request_validator,
+            "response_validator_enable": enable_response_validator,
+        }
+
+        super(RootResourceNode, self).__init__(None, internal_root)
 
     def set_base_url(self, base_url):
         """ Set the base URL to use for every resources in the resource tree """
