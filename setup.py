@@ -24,6 +24,7 @@ setup(
     license='MIT',
     description='Another Generator Of Rest Api.',
     long_description=README,
+    long_description_content_type="text/markdown",
     install_requires=[
         'setuptools',
         'six',
