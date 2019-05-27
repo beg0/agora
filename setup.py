@@ -16,7 +16,7 @@ except IOError:
 
 setup(
     name='agora',
-    version='0.0.1',
+    version='0.1.0',
     author='beg0',
     author_email='beg0@free.fr',
     packages=['agora'],
