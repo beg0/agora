@@ -30,7 +30,7 @@ setup(
         'six',
         'pyraml-parser>=0.1.7',
         'requests',
-        'flex',
+        'flex>=6.12',
     ],
     #zip_safe=True,
     include_package_data=True,
