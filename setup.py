@@ -1,16 +1,17 @@
 #!/usr/bin/python
+import os.path
 from setuptools import setup
-#import os
 
 
-#here = os.path.abspath(os.path.dirname(__file__))
-#try:
-#    with open(os.path.join(here, 'README.md')) as f:
-#        README = f.read()
+here = os.path.abspath(os.path.dirname(__file__))
+try:
+    with open(os.path.join(here, 'README.md')) as f:
+        README = f.read()
 #    with open(os.path.join(here, 'CHANGES.txt')) as f:
 #        CHANGES = f.read()
-#except IOError:
-#    README = CHANGES = ''
+except IOError:
+    README = "AGORA is a library to generate client-side accessors for HTTP REST API."
+    CHANGES = ''
 
 
 setup(
@@ -22,7 +23,7 @@ setup(
     url='https://github.com/beg0/agora',
     license='MIT',
     description='Another Generator Of Rest Api.',
-    long_description="AGORA is a library to generate client-side accessors for HTTP REST API.",
+    long_description=README,
     install_requires=[
         'setuptools',
         'six',
