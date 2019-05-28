@@ -46,7 +46,7 @@ class InternalMethod(object):
         for attr in ["verb", "request_mime", "response_mime"]:
             if self.__getattribute__(attr) != other.__getattribute__(attr):
                 # Uncomment to debug equality
-                #print("%s differents: %r vs %r" % \
+                #print("%s different: %r vs %r" % \
                 #     (attr, self.__getattribute__(attr), other.__getattribute__(attr)))
                 return False
         return True
@@ -127,7 +127,7 @@ class InternalNode(object):
                      "input_validator", "doc", "varname"]:
             if self.__getattribute__(attr) != other.__getattribute__(attr):
                 # Uncomment to debug equality
-                #print("%s: %s differents: %r vs %r" % \
+                #print("%s: %s different: %r vs %r" % \
                 #     (self.name, attr, self.__getattribute__(attr), other.__getattribute__(attr)))
                 return False
         return True
