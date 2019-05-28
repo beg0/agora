@@ -129,3 +129,23 @@ class TestResourceNode(unittest.TestCase):
             isinstance(child1.put, types.MethodType)
 
         self.assertIsInstance(child2.put,types.MethodType)
+
+    def test_verb_translator(self):
+        root = RootResourceNode(self.root_intenal)
+
+        child1=root.child1
+
+        self.assertTrue(hasattr(child1,"get"), "if no translator, we have lowercase verb name")
+        self.assertFalse(hasattr(child1,"TEG"), "if no translator, we don't have reversed verb name")
+
+
+        def reverse_verb(method):
+            return method.verb[::-1]
+
+        root_reverse = RootResourceNode(self.root_intenal, verb_translator=reverse_verb)
+
+        child1_reverse=root_reverse.child1
+
+        self.assertTrue(hasattr(child1_reverse,"TEG"), "if we have translator, we have reversed verb name")
+        self.assertFalse(hasattr(child1_reverse,"get"), "if we have translator, we don't have lowercase verb name")
+

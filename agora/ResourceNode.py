@@ -144,7 +144,13 @@ class ResourceNode(object):
         # Now bind the function 'unbound' to this ResourceNode
         bound = unbound.__get__(self, ResourceNode)
 
-        self.__setattr__(verb.lower(), bound)
+        verb_translator = self.shared_config["verb_translator"]
+        if verb_translator:
+            method_name = verb_translator(method)
+        else:
+            method_name = verb.lower()
+
+        self.__setattr__(method_name, bound)
 
     def __call__(self, *lst, **kwargs):
         if len(lst) > 0 and len(kwargs) > 0:
@@ -255,7 +261,11 @@ class RootResourceNode(ResourceNode):
     def __init__(self, internal_root,
                  lazyloading=True,
                  enable_request_validator=True,
-                 enable_response_validator=True):
+                 enable_response_validator=True,
+                 verb_translator=None):
+
+        if verb_translator:
+            assert six.callable(verb_translator), "'verb_translator' must be callable"
 
         # Create the shared config.
         # As its name stand for, this dict will be shared by all ResourceNode
@@ -263,7 +273,9 @@ class RootResourceNode(ResourceNode):
             "lazyloading": lazyloading,
             "request_validator_enable": enable_request_validator,
             "response_validator_enable": enable_response_validator,
+            "verb_translator": verb_translator,
         }
+
 
         super(RootResourceNode, self).__init__(None, internal_root)
 
