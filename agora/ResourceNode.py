@@ -37,7 +37,7 @@ class ResourceNode(object):
             self.shared_config = parent.shared_config
         else:
             assert hasattr(self, "shared_config"), \
-                "for RootResourceNode self.shared_config must be created before ResourceNode xtor"
+                "for RootResourceNode self.shared_config must be created before ResourceNode ctor"
 
         assert isinstance(self.shared_config, dict)
 
@@ -54,7 +54,7 @@ class ResourceNode(object):
 
         self._update_url()
 
-        # create all (non-param) children, unless lasyloading is enabled
+        # create all (non-param) children, unless lazyloading is enabled
         if self.shared_config["lazyloading"] is False:
             for attr in self.internal_node.children:
                 self.__getattr__(attr)
@@ -70,7 +70,7 @@ class ResourceNode(object):
 
     def _generate_http_request_method(self, method):
         """ Generate the 'get','post','put', 'delete', 'head' and 'patch' functions attached to
-        this ResourceNode programatically """
+        this ResourceNode programmatically """
         verb = method.verb
 
         assert ResourceNode.is_valid_method(verb), "%s is invalid verb" % verb
@@ -171,7 +171,7 @@ class ResourceNode(object):
             param_name = next(iter(self.internal_node.param_children))
             param_value = lst[0]
         elif len(lst) != 0:
-            raise TypeError("Too many positional agument, except at max one")
+            raise TypeError("Too many positional argument, except at max one")
 
         if len(kwargs) == 1:
             param_name = next(iter(kwargs))
@@ -231,7 +231,7 @@ class ResourceNode(object):
                 child._update_url()
 
 class ParamResourceNode(ResourceNode):
-    """ A Resource Node for resource which url depend on a paramter
+    """ A Resource Node for resource which url depend on a parameter
 
     e.g a resource which url looks like /user/{user}/photo
     """
