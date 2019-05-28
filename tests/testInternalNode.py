@@ -13,7 +13,7 @@ import unittest
 from agora.InternalNode import InternalNode,InternalMethod
 
 class TestInternalNode(unittest.TestCase):
-    def test_xtor(self):
+    def test_ctor(self):
         name = "james_bond"
         node = InternalNode(name,None)
 
@@ -27,7 +27,7 @@ class TestInternalNode(unittest.TestCase):
 
         self.assertFalse(node.is_placeholder())
 
-    def test_xtor_param(self):
+    def test_ctor_param(self):
         varname = "id"
         name = "${%s}" % varname
         node = InternalNode(name,None)

@@ -17,7 +17,7 @@ from agora.InternalNode import *
 class TestResourceNode(unittest.TestCase):
     BASE_URL="http://example.com"
     def setUp(self):
-        self.root_intenal = root = InternalNode(TestResourceNode.BASE_URL,None)
+        self.root_internal = root = InternalNode(TestResourceNode.BASE_URL,None)
         child1=root.add_child("child1")
         param_child1 = root.add_child('${param1}')
         param_child2 = root.add_child('${param2}')
@@ -34,7 +34,7 @@ class TestResourceNode(unittest.TestCase):
 
 
     def test_attribute_creations(self):
-        root = RootResourceNode(self.root_intenal)
+        root = RootResourceNode(self.root_internal)
 
         child1=root.child1
         child2=root.child1.child2
@@ -51,14 +51,14 @@ class TestResourceNode(unittest.TestCase):
             root.not_a_child
 
     def test_call_no_arguments(self):
-        root = RootResourceNode(self.root_intenal)
+        root = RootResourceNode(self.root_internal)
 
         self.assertIs(root(),root, "call with no args return same object")
         self.assertIs(root.child1(),root.child1,"call with no args return same object")
         self.assertIs(root.child1.child2(),root.child1.child2,"call with no args return same object")
 
     def test_param_creation_by_kwargs(self):
-        root = RootResourceNode(self.root_intenal)
+        root = RootResourceNode(self.root_internal)
 
         param_child1 = root(param1="arg_first_param")
         param_child2 = root(param2="arg_second_param")
@@ -67,7 +67,7 @@ class TestResourceNode(unittest.TestCase):
         self.assertIsInstance(param_child2, ParamResourceNode)
 
         self.assertIs(root(param1="arg_first_param"),param_child1, "don't recreate param")
-        self.assertNotEqual(root(param1="another_arg_first_param"),param_child1, "different args give differents nodes")
+        self.assertNotEqual(root(param1="another_arg_first_param"),param_child1, "different args give different nodes")
 
         self.assertNotEqual(param_child1, param_child2)
 
@@ -80,7 +80,7 @@ class TestResourceNode(unittest.TestCase):
 
 
     def test_param_creation_by_list(self):
-        root = RootResourceNode(self.root_intenal)
+        root = RootResourceNode(self.root_internal)
 
         with self.assertRaisesRegexp(TypeError,"Can't deduce parameter name:.*"):
             root("bad arg")
@@ -98,26 +98,26 @@ class TestResourceNode(unittest.TestCase):
 
 
     def test_call_with_both_list_and_kwargs(self):
-        root = RootResourceNode(self.root_intenal)
+        root = RootResourceNode(self.root_internal)
         with self.assertRaisesRegexp(TypeError,"Except at max one positional argument or one named argument.*"):
             root("arg_first_param",param1="arg_first_param")
 
 
     def test_url(self):
-        root = RootResourceNode(self.root_intenal)
+        root = RootResourceNode(self.root_internal)
         self.assertEqual(root.child1.url, TestResourceNode.BASE_URL+"/child1")
         self.assertEqual(root.child1.child2.url, TestResourceNode.BASE_URL+"/child1/child2")
 
     def test_set_base_url(self):
-        root = RootResourceNode(self.root_intenal)
-        new_base_url="http://127.0.0.1"
+        root = RootResourceNode(self.root_internal)
+        new_base_url = "http://127.0.0.1"
         root.set_base_url(new_base_url)
         self.assertEqual(root.child1.url, new_base_url+"/child1")
         self.assertEqual(root.child1.child2.url, new_base_url+"/child1/child2")
         self.assertEqual(root.child1("arg_third_param").url, new_base_url+"/child1/arg_third_param")
 
     def test_http_methods(self):
-        root = RootResourceNode(self.root_intenal)
+        root = RootResourceNode(self.root_internal)
 
         child1=root.child1
         child2=root.child1.child2
@@ -131,7 +131,7 @@ class TestResourceNode(unittest.TestCase):
         self.assertIsInstance(child2.put,types.MethodType)
 
     def test_verb_translator(self):
-        root = RootResourceNode(self.root_intenal)
+        root = RootResourceNode(self.root_internal)
 
         child1=root.child1
 
@@ -142,7 +142,7 @@ class TestResourceNode(unittest.TestCase):
         def reverse_verb(method):
             return method.verb[::-1]
 
-        root_reverse = RootResourceNode(self.root_intenal, verb_translator=reverse_verb)
+        root_reverse = RootResourceNode(self.root_internal, verb_translator=reverse_verb)
 
         child1_reverse=root_reverse.child1
 
