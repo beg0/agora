@@ -93,7 +93,7 @@ class TestResourceNode(unittest.TestCase):
 
         self.assertEqual(param_child3, root.child1(param3="arg_third_param"),"creation by list == creation by kw")
 
-        with self.assertRaisesRegexp(TypeError,"Too many positional agument, except at max one"):
+        with self.assertRaisesRegexp(TypeError,"Too many positional argument, except at max one"):
             root.child1("arg_third_param","arg_third_param_bis")
 
 
